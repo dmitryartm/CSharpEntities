@@ -1,6 +1,6 @@
 ﻿using CSlns.Entities.Systems;
+using CSlns.Entities.Wpf.TreeListView.ViewModels;
 using CSlns.Entities.Wpf.ViewModels;
-using CSlns.Wpf.TreeListView.ViewModels;
 using ReactiveUI;
 
 

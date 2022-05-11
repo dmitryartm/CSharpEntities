@@ -251,13 +251,6 @@ namespace CSlns.Entities {
 
             this.IncreaseVersion();
         }
-
-
-        public string ToReadableString() {
-            return string.Join(
-                Environment.NewLine + Environment.NewLine,
-                this.ArchetypeEntityCollections.Select(x => x.ToReadableString()));
-        }
         
         
         #endregion

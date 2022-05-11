@@ -1,7 +1,4 @@
-﻿using CSlns.Std;
-
-
-namespace CSlns.Entities {
+﻿namespace CSlns.Entities {
     public class ArchetypeEntityCollection {
     
         internal ArchetypeEntityCollection(EntityManager entityManager, Archetype archetype, int chunkCapacity) {
@@ -27,10 +24,10 @@ namespace CSlns.Entities {
         
         public int EntityCountInChunk(int chunkIndex) => chunkIndex == this._chunks.Count - 1 ? this._lastChunkItemCount : this._chunkCapacity;
 
-        public Option<Index> EntityIndex(EntityId entity) =>
-            this._entityIndices.TryGetValue(entity, out var index)
-                ? Option.Some(index)
-                : default;
+
+        public bool TryGetEntityIndex(EntityId entity, out Index index) {
+            return this._entityIndices.TryGetValue(entity, out index);
+        }
 
         
         public IReadOnlyCollection<EntityId> Entities => this._entityIndices.Keys;
@@ -51,7 +48,7 @@ namespace CSlns.Entities {
 
         public bool TryGet<T>(EntityId entity, out T value) {
             if (this._layout.TryIndex(typeof(T), out var layoutIndex)
-                && this.EntityIndex(entity).TryGetValue(out var entityIndex)) {
+                && this.TryGetEntityIndex(entity, out var entityIndex)) {
 
                 value = this.Chunk(entityIndex.ChunkIndex).Components<T>(layoutIndex)[entityIndex.ItemIndex];
                 return true;
@@ -60,33 +57,6 @@ namespace CSlns.Entities {
                 value = default;
                 return false;
             }
-        }
-
-
-        public string ToReadableString() {
-            var table = new StringTable();
-            var writer = table.CreateWriter();
-
-            {
-                writer.Cell("Entity");
-                foreach (var component in this._layout.Components) {
-                    writer.Cell(component.Name);
-                }
-            }
-
-            for (var chunkIndex = 0; chunkIndex < this.ChunkCount; ++chunkIndex) {
-                var chunk = this.Chunk(chunkIndex);
-                for (var entityIndex = 0; entityIndex < this.EntityCountInChunk(chunkIndex); ++entityIndex) {
-                    writer.Row();
-                    writer.Cell(chunk.Entities[entityIndex].Value.ToString());
-                    for (var i = 0; i < this._layout.ComponentCount; ++i) {
-                        var component = chunk.Components(i).GetValue(entityIndex);
-                        writer.Cell(component?.ToString() ?? "null");
-                    }
-                }
-            }
-
-            return this.Archetype.ToString() + Environment.NewLine + table.ToString();
         }
         
         
@@ -161,7 +131,11 @@ namespace CSlns.Entities {
             --this._lastChunkItemCount;
             if (this._lastChunkItemCount <= 0) {
                 this._reservedChunk = this._chunks[this.LastChunkIndex];
-                this._chunks.RemoveLast();
+
+                if (this._chunks.Count > 0) {
+                    this._chunks.RemoveAt(this._chunks.Count - 1);
+                }
+                
                 this._lastChunkItemCount = this._chunkCapacity;
             }
 

@@ -1,6 +1,5 @@
-﻿using System.Linq;
-using CSlns.Std;
-using CSlns.Wpf;
+﻿using System;
+using System.Linq;
 using ReactiveUI;
 
 
@@ -8,10 +7,10 @@ namespace CSlns.Entities.Wpf.ViewModels {
     public class ArchetypeListViewItemModel : ReactiveObject {
 
         public ArchetypeListViewItemModel() {
-            this._components.RaisePropertyChanged(this, nameof(this.Components));
-            this._componentIndices.RaisePropertyChanged(this, nameof(this.ComponentIndices));
-            this._entityCount.RaisePropertyChanged(this, nameof(this.EntityCount));
-            this._index.RaisePropertyChanged(this, nameof(this.Index));
+            this._components.Subscribe(_ => this.RaisePropertyChanged(nameof(this.Components)));
+            this._componentIndices.Subscribe(_ => this.RaisePropertyChanged(nameof(this.ComponentIndices)));
+            this._entityCount.Subscribe(_ => this.RaisePropertyChanged(nameof(this.EntityCount)));
+            this._index.Subscribe(_ => this.RaisePropertyChanged(nameof(this.Index)));
         }
 
         

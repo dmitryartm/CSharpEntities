@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Subjects;
 using CSlns.Entities.Systems;
-using CSlns.Std;
 
 
 namespace CSlns.Entities {
@@ -14,22 +13,24 @@ namespace CSlns.Entities {
         public IComponentSystem RootSystem { get; protected set; }
 
 
-        public Option<T> TryGet<T>() where T : IWorldSingleObject {
-            if (this._objects.TryGetValue(typeof(T), out var system)) {
-                return Option.Some((T) system);
+        public bool TryGet<T>(out T obj) where T : IWorldSingleObject {
+            if (this._objects.TryGetValue(typeof(T), out var value)) {
+                obj = (T) value;
+                return true;
             }
             else {
-                return default;
+                obj = default;
+                return false;
             }
         }
 
 
         public T Get<T>() where T : IWorldSingleObject  {
-            if (this.TryGet<T>().TryGetValue(out var system)) {
-                return system;
+            if (this.TryGet<T>(out var obj)) {
+                return obj;
             }
             else {
-                throw new ArgumentException($"Unable to get system {typeof(T).Name}. System not found.");
+                throw new ArgumentException($"Unable to get object {typeof(T).Name}. Object is not registered.");
             }
         }
 

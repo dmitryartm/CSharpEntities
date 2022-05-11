@@ -3,9 +3,7 @@ using System.Diagnostics;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using CSlns.Entities.Systems;
-using CSlns.Std;
-using CSlns.Wpf;
-using CSlns.Wpf.TreeListView.ViewModels;
+using CSlns.Entities.Wpf.TreeListView.ViewModels;
 using ReactiveUI;
 
 
@@ -14,7 +12,7 @@ namespace CSlns.Entities.Wpf.ViewModels {
         public ComponentSystemTreeViewItemContent(IComponentSystem system) {
             this._system = system;
 
-            this._executionTime.RaisePropertyChanged(this, nameof(this.ExecutionTimeMs));
+            this._executionTime.Subscribe(_ => this.RaisePropertyChanged(nameof(this.ExecutionTimeMs)));
             
             this._executionTimeMsStr =
                 this._executionTime

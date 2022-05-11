@@ -5,10 +5,10 @@
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                          xmlns:rui="http://reactiveui.net"
-                         xmlns:tlv="clr-namespace:CSlns.Wpf.TreeListView.Views;assembly=CSlns.Wpf"
+                         xmlns:tlv="clr-namespace:CSlns.Entities.Wpf.TreeListView.Views"
                          xmlns:vm="clr-namespace:CSlns.Entities.Wpf.ViewModels">
     <Grid>
-        <tlv:TreeListView Name="TreeView" AlternationCount="2" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+        <tlv:TreeListView x:Name="TreeView" AlternationCount="2" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
             <tlv:TreeListView.Resources>
                 <Style TargetType="{x:Type tlv:TreeListViewItem}">
                     <Style.Triggers>
