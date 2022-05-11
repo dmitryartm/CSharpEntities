@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSlns.Entities", "CSlns.Entities\CSlns.Entities.csproj", "{BE1F6A59-7E8D-4564-9973-F6ACBABB01C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSlns.Entities.Wpf", "CSlns.Entities.Wpf\CSlns.Entities.Wpf.csproj", "{2ED851F5-1BD0-4FFB-B0A0-296E4841C879}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE1F6A59-7E8D-4564-9973-F6ACBABB01C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE1F6A59-7E8D-4564-9973-F6ACBABB01C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE1F6A59-7E8D-4564-9973-F6ACBABB01C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE1F6A59-7E8D-4564-9973-F6ACBABB01C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2ED851F5-1BD0-4FFB-B0A0-296E4841C879}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2ED851F5-1BD0-4FFB-B0A0-296E4841C879}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2ED851F5-1BD0-4FFB-B0A0-296E4841C879}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2ED851F5-1BD0-4FFB-B0A0-296E4841C879}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
