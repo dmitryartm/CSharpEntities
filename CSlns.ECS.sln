@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECS", "ECS\ECS.csproj", "{5CE4BB05-01D2-48E7-B349-E547248680B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECS.WPF", "ECS.WPF\ECS.WPF.csproj", "{344F7C9A-4AB3-4EA4-A27D-4786A78DE135}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5CE4BB05-01D2-48E7-B349-E547248680B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CE4BB05-01D2-48E7-B349-E547248680B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CE4BB05-01D2-48E7-B349-E547248680B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CE4BB05-01D2-48E7-B349-E547248680B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{344F7C9A-4AB3-4EA4-A27D-4786A78DE135}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{344F7C9A-4AB3-4EA4-A27D-4786A78DE135}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{344F7C9A-4AB3-4EA4-A27D-4786A78DE135}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{344F7C9A-4AB3-4EA4-A27D-4786A78DE135}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
