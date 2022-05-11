@@ -5,6 +5,11 @@ using CSlns.Entities.Systems;
 
 namespace CSlns.Entities {
     public abstract class World {
+
+        protected World(int chunkCapacity = 512) {
+            this.Entities = new EntityManager(chunkCapacity);
+        }
+        
         
         #region Public
         
@@ -41,6 +46,16 @@ namespace CSlns.Entities {
 
 
         public IObservable<Unit> AfterLoad => this._afterLoadSubject;
+
+
+        public void StartSystems() {
+            this.RootSystem?.Start();
+        }
+        
+
+        public void ExecuteSystems() {
+            this.RootSystem?.ExecuteIfEnabled();
+        }
         
         
         #endregion
@@ -94,16 +109,6 @@ namespace CSlns.Entities {
         public new IComponentSystem<TWorld> RootSystem {
             get => (IComponentSystem<TWorld>) base.RootSystem;
             protected set => base.RootSystem = value;
-        }
-
-
-        public void StartSystems() {
-            this.RootSystem.Start();
-        }
-        
-
-        public void ExecuteSystems() {
-            this.RootSystem.ExecuteIfEnabled();
         }
 
 

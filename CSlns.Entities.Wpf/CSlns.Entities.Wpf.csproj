@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net461</TargetFramework>
         <UseWPF>true</UseWPF>
         <LangVersion>10</LangVersion>
+        <TargetFrameworks>net461;net5.0-windows</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>
