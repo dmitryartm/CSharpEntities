@@ -1,0 +1,10 @@
+LIBRARY "Direct3DLib"
+
+EXPORTS
+
+LoadVertexShaderFromFile
+LoadPixelShaderFromFile
+SetPixelShader
+SetVertexShader
+CreateDummyWindow
+DestroyDummyWindow
