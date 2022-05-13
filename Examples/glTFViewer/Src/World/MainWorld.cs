@@ -1,26 +1,43 @@
 ﻿using System.Threading;
+using System.Windows.Interop;
 using CSlns.Entities;
 using CSlns.Entities.Systems;
+using glTFViewer.World.Systems;
+using Serilog;
 
 
-namespace glTFViewer.World; 
+namespace glTFViewer.World;
 
 
 public class MainWorld : CSlns.Entities.World {
 
-    public MainWorld() {
-        this.RootSystem = new InlineSystem(this, "RootSystem") {
-            new InlineSystem(this, "Child 0", _ => Thread.Sleep(2)),
-            new InlineSystem(this, "Child 1", _ => Thread.Sleep(4)),
+    public MainWorld(D3DImage image) {
+        this.D3DImage = image;
+        this.RootSystem = new InlineSystem(this, "MainWorld") {
+            new GltfLoaderSystem(this),
+            new DeviceManagerSystem(this) {
+                new GpuBufferManagerSystem(this),
+                new SurfaceManagerSystem(this) {
+                    new CameraSystem(this),
+                    new RenderSystem(this)
+                }
+            }
         };
 
-        for (var i = 0; i < 10; ++i) {
-            this.Entities.CreateEntity<int, float, string>();
-        }
+        this.StartSystems();
+    }
 
-        for (var i = 0; i < 5; ++i) {
-            this.Entities.CreateEntity<int, float>();
-        }
+
+    public ILogger Logger => Log.Logger;
+    
+    
+    public float DeltaTime { get; private set; }
+    public D3DImage D3DImage { get; }
+
+
+    public void Update(float deltaTime) {
+        this.DeltaTime = deltaTime;
+        this.ExecuteSystems();
     }
 
 }

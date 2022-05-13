@@ -11,7 +11,7 @@ using SharpDX;
 namespace glTFViewer.Views;
 
 
-public record struct DXRenderArg(D3DImage Image, float DeltaTime);
+public record struct DXRenderArg(float DeltaTime);
 
 
 public partial class DXControl : UserControl {
@@ -46,8 +46,8 @@ public partial class DXControl : UserControl {
                 })
                 .DistinctUntilChanged()
                 .Scan((prev: TimeSpan.Zero, current: TimeSpan.Zero), (pair, current) => (pair.current, current))
-                .Select(time => new DXRenderArg(this.D3DImage, (float) (time.current - time.prev).TotalSeconds))
-                .Where(arg => this.ImageSizeIsValid && arg.Image.IsFrontBufferAvailable)
+                .Select(time => new DXRenderArg((float) (time.current - time.prev).TotalSeconds))
+                .Where(arg => this.ImageSizeIsValid)
                 .Publish()
                 .RefCount();
     }

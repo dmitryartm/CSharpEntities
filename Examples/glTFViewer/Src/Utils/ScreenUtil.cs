@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Interop;
@@ -18,7 +17,7 @@ public static class ScreenUtil {
     }
 
 
-    public static Vector2 WpfToScreen(Point point) {
+    public static Vector2 WpfToScreen(System.Windows.Point point) {
         var (x, y) = WpfToScreen(point.X, point.Y);
         return new Vector2((float) x, (float) y);
     }
