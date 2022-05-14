@@ -77,16 +77,28 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                         MeshInstanceList
                     >();
 
+                    var transparentMeshArchetype = opaqueMeshArchetype.AddComponents<TransparentTag>();
+
 
                     for (var i = 0; i < meshes.Length; ++i) {
                         var mesh = meshes[i];
 
-                        var meshEntity =
-                            this.Entities.CreateEntity(opaqueMeshArchetype);
+                        var isTransparent = false;
+                        foreach (var vertex in mesh.Vertices) {
+                            if (vertex.Color.A < 255) {
+                                isTransparent = true;
+                                break;
+                            }
+                        }
+
+                        var meshEntity = this.Entities.CreateEntity(
+                            isTransparent ? transparentMeshArchetype : opaqueMeshArchetype
+                        );
 
                         this.Entities.Set(meshEntity, mesh);
                         this.Entities.Set(meshEntity, new MeshId { Index = i });
-                        this.Entities.Set(meshEntity, new MeshInstanceList { TransformMatrices = new List<Matrix>() });
+                        this.Entities.Set(meshEntity,
+                            new MeshInstanceList { TransformMatrices = new List<Matrix>() });
                         meshEntityByIndex[i] = meshEntity;
                     }
                 }
@@ -155,8 +167,8 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                             entitiesWithInstanceArray.Add(entity);
                         }
                     }).Execute();
-                    
-                    
+
+
                     foreach (var entity in entitiesWithInstanceArray) {
                         this.Entities.AddComponents<MeshInstanceArray, MeshInstanceArrayGpu>(entity);
                     }
@@ -188,7 +200,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                         }
 
                         var meshBounds = new BoundingBox(mesh.MinPos, mesh.MaxPos);
-                        
+
                         foreach (var matrix in instances.TransformMatrices) {
                             meshBounds.GetCorners(cornersBuffer);
                             for (var i = 0; i < cornersBuffer.Length; ++i) {
@@ -219,7 +231,8 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                     camera.ZFar = sceneSphere.Radius * 3f;
                 }
             }
-            catch (Exception ex) {
+            catch
+                (Exception ex) {
                 this.World.Logger.Error(ex, "Unable to load file {FileName}", this._fileToLoad);
                 MessageBox.Show(
                     Application.Current.MainWindow!,

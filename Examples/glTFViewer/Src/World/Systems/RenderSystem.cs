@@ -87,20 +87,22 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                     this.Device.SetRenderState(RenderState.AlphaBlendEnable, true);
                 }) {
                     new InlineSystem(this.World, "Depth Pass") {
-                        // new InlineQuerySystem(this.World, "Instanced",
-                        //     this.Entities.ForEach(
-                        //         archetype => archetype.HasComponents<TransparentTag>(),
-                        //         (ref MeshDataGpuComponent mesh, ref MeshInstancesGpu instances) =>
-                        //             DrawInstanced(this.Device, mesh, instances),
-                        //         drawInstanced => {
-                        //             if (drawInstanced.Query.HasEntities) {
-                        //                 this.Device.SetVertexShader(this._shaders
-                        //                     .VS_DiffuseOpaqueUniformColorInstanced);
-                        //                 this.Device.SetPixelShader(this._shaders.PS_DepthOnly);
-                        //                 drawInstanced.Execute();
-                        //                 this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
-                        //             }
-                        //         }),
+                        new InlineQuerySystem(this.World, "Instanced",
+                            this.Entities.ForEach(
+                                archetype => archetype.HasComponents<TransparentTag>(),
+                                (ref MeshDataGpuComponent mesh, ref MeshInstanceArrayGpu instances) =>
+                                    DrawInstanced(this.Device, mesh, instances)
+                            ),
+                            drawInstanced => {
+                                if (drawInstanced.Query.HasEntities) {
+                                    var shaders = this.Shaders;
+                                    this.Device.SetVertexShader(shaders.VS_DiffuseOpaqueUniformColorInstanced);
+                                    this.Device.SetPixelShader(shaders.PS_DepthOnly);
+                                    drawInstanced.Execute();
+                                    this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
+                                }
+                            }),
+
                         new InlineQuerySystem(this.World, "Single",
                             this.Entities.ForEach(
                                 archetype => archetype.HasComponents<TransparentTag>(),
@@ -118,20 +120,23 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                     },
 
                     new InlineSystem(this.World, "Color Pass") {
-                        // new InlineQuerySystem(this.World, "Instanced",
-                        //     this.Entities.ForEach(
-                        //         archetype => archetype.HasComponents<TransparentTag>(),
-                        //         (ref MeshDataGpuComponent mesh, ref MeshInstancesGpu instances) =>
-                        //             DrawInstanced(this.Device, mesh, instances),
-                        //         drawInstanced => {
-                        //             if (drawInstanced.Query.HasEntities) {
-                        //                 this.Device.SetVertexShader(this._shaders
-                        //                     .VS_DiffuseOpaqueVertexColorsInstanced);
-                        //                 this.Device.SetPixelShader(this._shaders.PS_Lit);
-                        //                 drawInstanced.Execute();
-                        //                 this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
-                        //             }
-                        //         }),
+                        
+                        new InlineQuerySystem(this.World, "Instanced",
+                            this.Entities.ForEach(
+                                archetype => archetype.HasComponents<TransparentTag>(),
+                                (ref MeshDataGpuComponent mesh, ref MeshInstanceArrayGpu instances) =>
+                                    DrawInstanced(this.Device, mesh, instances)
+                            ),
+                            drawInstanced => {
+                                if (drawInstanced.Query.HasEntities) {
+                                    var shaders = this.Shaders;
+                                    this.Device.SetVertexShader(shaders.VS_DiffuseOpaqueVertexColorsInstanced);
+                                    this.Device.SetPixelShader(shaders.PS_Lit);
+                                    drawInstanced.Execute();
+                                    this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
+                                }
+                            }),
+
                         new InlineQuerySystem(this.World, "Single",
                             this.Entities.ForEach(
                                 archetype => archetype.HasComponents<TransparentTag>(),
