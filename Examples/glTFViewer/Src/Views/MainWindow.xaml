@@ -6,7 +6,7 @@
         xmlns:entities="clr-namespace:CSlns.Entities.Wpf.Views;assembly=CSlns.Entities.Wpf"
         xmlns:views="clr-namespace:glTFViewer.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="700" Width="900">
+        Title="glTFViewer example" Height="700" Width="1000">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -18,33 +18,33 @@
         </Menu>
 
         <Grid Grid.Row="1">
-
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="400" />
             </Grid.ColumnDefinitions>
-
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="300" />
-                </Grid.RowDefinitions>
-
-                <views:DXControl Grid.Row="0" x:Name="_DXControl" />
-
-                <GridSplitter Grid.Row="1" ShowsPreview="True" HorizontalAlignment="Stretch"
-                              VerticalAlignment="Stretch" />
-
-                <entities:ComponentSystemTreeView Grid.Row="2" x:Name="_SystemTree" />
-
-            </Grid>
+            
+            <views:DXControl x:Name="_DXControl" />
 
             <GridSplitter Grid.Column="1" ShowsPreview="True" HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch" />
 
-            <entities:ArchetypeListView Grid.Column="2" x:Name="_ArchetypeList" />
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <entities:ComponentSystemTreeView Grid.Row="0" x:Name="_SystemTree" />
+
+                <GridSplitter Grid.Row="1" ShowsPreview="True" HorizontalAlignment="Stretch"
+                              VerticalAlignment="Stretch" />
+
+                <entities:ArchetypeListView Grid.Row="2" x:Name="_ArchetypeList" />
+
+            </Grid>
 
         </Grid>
 
