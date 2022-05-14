@@ -131,7 +131,12 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                     void AddNodeRec(int nodeIndex, Option<Matrix> parentMatrixOpt) {
                         var node = gltf.Nodes[nodeIndex];
 
-                        var matrix = new Matrix(node.Matrix);
+                        var trs =
+                            Matrix.Scaling(new Vector3(node.Scale))
+                            * Matrix.RotationQuaternion(new Quaternion(node.Rotation))
+                            * Matrix.Translation(new Vector3(node.Translation));
+                        
+                        var matrix = trs * new Matrix(node.Matrix);
                         if (parentMatrixOpt.TryGetValue(out var parentMatrix)) {
                             matrix *= parentMatrix;
                         }
