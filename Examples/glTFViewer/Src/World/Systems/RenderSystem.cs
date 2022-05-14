@@ -52,27 +52,26 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                 }),
 
                 new InlineSystem(this.World, "Opaque") {
-                    // new InlineQuerySystem(this.World, "Instanced",
-                    //     this.Entities.ForEach(
-                    //         archetype => !archetype.HasComponents<TransparentTag>(),
-                    //         (ref MeshDataGpuComponent mesh, ref MeshInstancesGpu instances) =>
-                    //             DrawInstanced(this.Device, mesh, instances)),
-                    //     drawInstanced => {
-                    //         if (drawInstanced.Query.HasEntities) {
-                    //             this.Device.SetVertexShader(this._shaders.VS_DiffuseOpaqueVertexColorsInstanced);
-                    //             this.Device.SetPixelShader(this._shaders.PS_Lit);
-                    //             drawInstanced.Execute();
-                    //             this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
-                    //         }
-                    //     }),
+                    new InlineQuerySystem(this.World, "Instanced",
+                        this.Entities.ForEach(
+                            archetype => !archetype.HasComponents<TransparentTag>(),
+                            (ref MeshDataGpuComponent mesh, ref MeshInstanceArrayGpu instances) =>
+                                DrawInstanced(this.Device, mesh, instances)),
+                        drawInstanced => {
+                            if (drawInstanced.Query.HasEntities) {
+                                var shaders = this.Shaders;
+                                this.Device.SetVertexShader(shaders.VS_DiffuseOpaqueVertexColorsInstanced);
+                                this.Device.SetPixelShader(shaders.PS_Lit);
+                                drawInstanced.Execute();
+                                this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
+                            }
+                        }),
 
                     new InlineQuerySystem(this.World, "Single",
                         this.Entities.ForEach(
                             archetype => !archetype.HasComponents<TransparentTag>(),
-                            (ref MeshDataGpuComponent mesh, ref MeshInstanceList instances) => {
-                                foreach (var matrix in instances.TransformMatrices) {
-                                    DrawSingle(this.Device, mesh, matrix);
-                                }
+                            (ref MeshDataGpuComponent mesh, ref MeshSingleInstance instance) => {
+                                DrawSingle(this.Device, mesh, instance.TransformMatrix);
                             }),
                         drawVisibleSingle => {
                             if (drawVisibleSingle.Query.HasEntities) {
@@ -105,10 +104,8 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                         new InlineQuerySystem(this.World, "Single",
                             this.Entities.ForEach(
                                 archetype => archetype.HasComponents<TransparentTag>(),
-                                (ref MeshDataGpuComponent mesh, ref MeshInstanceList instances) => {
-                                    foreach (var matrix in instances.TransformMatrices) {
-                                        DrawSingle(this.Device, mesh, matrix);
-                                    }
+                                (ref MeshDataGpuComponent mesh, ref MeshSingleInstance instance) => {
+                                    DrawSingle(this.Device, mesh, instance.TransformMatrix);
                                 }),
                             drawVisibleSingle => {
                                 if (drawVisibleSingle.Query.HasEntities) {
@@ -138,10 +135,8 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                         new InlineQuerySystem(this.World, "Single",
                             this.Entities.ForEach(
                                 archetype => archetype.HasComponents<TransparentTag>(),
-                                (ref MeshDataGpuComponent mesh, ref MeshInstanceList instances) => {
-                                    foreach (var matrix in instances.TransformMatrices) {
-                                        DrawSingle(this.Device, mesh, matrix);
-                                    }
+                                (ref MeshDataGpuComponent mesh, ref MeshSingleInstance instance) => {
+                                    DrawSingle(this.Device, mesh, instance.TransformMatrix);
                                 }),
                             drawVisibleSingle => {
                                 if (drawVisibleSingle.Query.HasEntities) {
@@ -177,16 +172,17 @@ public class RenderSystem : ComponentSystem<MainWorld> {
             };
 
 
-            // static void DrawInstanced(DeviceEx device, in MeshDataGpuComponent mesh, in MeshInstancesGpu instances) {
-            //     device.Indices = mesh.Indices;
-            //
-            //     device.SetStreamSourceFrequency(0, instances.Count, StreamSource.IndexedData);
-            //     device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
-            //     device.SetStreamSource(1, instances.Instances, 0, instances.Stride);
-            //
-            //     device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
-            //         mesh.TrianglesCount);
-            // }
+            static void DrawInstanced(DeviceEx device, in MeshDataGpuComponent mesh,
+                in MeshInstanceArrayGpu instances) {
+                device.Indices = mesh.Indices;
+
+                device.SetStreamSourceFrequency(0, instances.Count, StreamSource.IndexedData);
+                device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
+                device.SetStreamSource(1, instances.TransformMatrices, 0, instances.Stride);
+
+                device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
+                    mesh.TrianglesCount);
+            }
 
 
             static void DrawSingle(DeviceEx device, in MeshDataGpuComponent mesh, in Matrix localToWorld) {
@@ -266,11 +262,12 @@ public class RenderSystem : ComponentSystem<MainWorld> {
             return this._shaders;
         }
     }
-    
+
+
     private MeshDataGpuComponent _screenQuad;
     private SurfaceManagerSystem? SurfaceManager;
     private DeviceManagerSystem? DeviceManager;
-    
+
     private Size2 SurfaceSize => this.SurfaceManager!.SurfaceSize;
     private D3DImage Image => this.World.D3DImage;
     private Surface RenderSurface => this.SurfaceManager!.RenderSurface!;

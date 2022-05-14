@@ -64,6 +64,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                 CreateMeshEntities();
                 CreateNodeEntities();
                 UpdateCamera();
+                CreateMeshInstanceArrays();
 
                 this._loadedFile = this._fileToLoad;
 
@@ -73,9 +74,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                         MeshDataComponent,
                         MeshDataGpuComponent,
                         MeshId,
-                        MeshInstanceList,
-                        MeshInstanceArray,
-                        MeshInstanceArrayGpu
+                        MeshInstanceList
                     >();
 
 
@@ -140,6 +139,42 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                                 AddNodeRec(childIndex, Option.Some(matrix));
                             }
                         }
+                    }
+                }
+
+
+                void CreateMeshInstanceArrays() {
+                    var entitiesWithInstanceArray = new List<Entity>();
+                    var entitiesWithSingleInstance = new List<Entity>();
+
+                    this.Entities.ForEach((in Entity entity, ref MeshInstanceList instances) => {
+                        if (instances.TransformMatrices.Count == 1) {
+                            entitiesWithSingleInstance.Add(entity);
+                        }
+                        else {
+                            entitiesWithInstanceArray.Add(entity);
+                        }
+                    }).Execute();
+                    
+                    
+                    foreach (var entity in entitiesWithInstanceArray) {
+                        this.Entities.AddComponents<MeshInstanceArray, MeshInstanceArrayGpu>(entity);
+                    }
+
+                    foreach (var entity in entitiesWithSingleInstance) {
+                        this.Entities.AddComponents<MeshSingleInstance>(entity);
+                    }
+
+                    this.Entities.ForEach((ref MeshInstanceList list, ref MeshInstanceArray array) => {
+                        array.TransformMatrices = list.TransformMatrices.ToArray();
+                    }).Execute();
+
+                    this.Entities.ForEach((ref MeshInstanceList list, ref MeshSingleInstance instance) => {
+                        instance.TransformMatrix = list.TransformMatrices.First();
+                    }).Execute();
+
+                    foreach (var entity in entitiesWithInstanceArray.Concat(entitiesWithSingleInstance)) {
+                        this.Entities.RemoveComponent<MeshInstanceList>(entity);
                     }
                 }
 
