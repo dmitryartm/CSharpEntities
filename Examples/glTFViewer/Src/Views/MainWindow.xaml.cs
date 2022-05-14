@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using glTFViewer.World;
 using glTFViewer.World.Systems;
@@ -18,6 +20,8 @@ public partial class MainWindow : Window {
         this.InitializeComponent();
 
         this._world = new MainWorld(this._DXControl.D3DImage);
+        this._gltfLoader = this._world.Get<GltfLoaderSystem>();
+            
         this._SystemTree.InitViewModel(this._world);
         this._ArchetypeList.InitViewModel(this._world);
 
@@ -29,10 +33,15 @@ public partial class MainWindow : Window {
         this._DXControl.ImageSizeObs.Subscribe(size => {
             surfaceManagerSystem.SurfaceSize = size;
         });
+
+        var dir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var simpleSceneFile = Path.Combine(dir, @"Resources\Models\simple_scene.gltf");
+        this._gltfLoader.LoadFile(simpleSceneFile);
     }
 
 
     private readonly MainWorld _world;
+    private readonly GltfLoaderSystem _gltfLoader;
 
 
     private void _OpenFileMenuItem_OnClick(object sender, RoutedEventArgs e) {
@@ -42,13 +51,13 @@ public partial class MainWindow : Window {
         
         if (dialog.ShowDialog(this) == true) {
             var fileName = dialog.FileName;
-            this._world.Get<GltfLoaderSystem>().LoadFile(fileName);
+            this._gltfLoader.LoadFile(fileName);
         }
     }
 
 
     private void _ClearMenuItem_OnClick(object sender, RoutedEventArgs e) {
-        this._world.Get<GltfLoaderSystem>().Unload();
+        this._gltfLoader.Unload();
     }
     
 }

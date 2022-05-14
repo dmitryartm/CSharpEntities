@@ -36,9 +36,13 @@
         <None Update="Resources\Shaders\Compiled\*">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Resources\Models\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Resources\Models" />
       <Folder Include="Resources\Shaders\Compiled" />
     </ItemGroup>
 
