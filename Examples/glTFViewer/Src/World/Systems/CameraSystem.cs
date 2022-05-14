@@ -21,8 +21,9 @@ public class CameraSystem : ComponentSystem<MainWorld> {
     protected override void OnStart() {
         this._surfaceManagerSystem = this.World.Get<SurfaceManagerSystem>();
         this.Entities.CreateEntity(new MainCamera() {
-            RotationSpeed = -2f * MathF.PI / 10f,
-            Theta = MathF.PI / 8f,
+            Phi = MathF.PI,
+            RotationSpeed = 2f * MathF.PI / 15f,
+            Theta = MathF.PI / 10f,
         });
     }
 
