@@ -45,4 +45,10 @@ public partial class MainWindow : Window {
             this._world.Get<GltfLoaderSystem>().LoadFile(fileName);
         }
     }
+
+
+    private void _ClearMenuItem_OnClick(object sender, RoutedEventArgs e) {
+        this._world.Get<GltfLoaderSystem>().Unload();
+    }
+    
 }

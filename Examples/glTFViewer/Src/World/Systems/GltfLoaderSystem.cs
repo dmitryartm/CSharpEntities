@@ -49,7 +49,10 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
     protected override void OnExecute() {
         var needToUnload = this._loadedFile != null && this._fileToLoad != this._loadedFile;
         if (needToUnload) {
-            //TODO: unload
+            this.Entities.ForEach((ref MeshInstanceArrayGpu instances) => instances.Dispose()).Execute();
+            this.Entities.ForEach((ref MeshDataGpuComponent mesh) => mesh.Dispose()).Execute();
+            this.Entities.DestroyAllEntities(archetype => !archetype.HasComponents<MainCamera>());
+            this._loadedFile = null;
         }
 
         var needToLoadFile = this._fileToLoad != null && this._fileToLoad != this._loadedFile;
@@ -226,6 +229,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                     camera.Origin = sceneSphere.Center;
                     var minimumSize = 2.01f * sceneSphere.Radius;
                     camera.MinimumFrustumSize = new Size2F(minimumSize, minimumSize);
+                    camera.Phi = 1.5f * MathF.PI;
                     camera.Radius = sceneSphere.Radius * 1.5f;
                     camera.ZNear = 0f;
                     camera.ZFar = sceneSphere.Radius * 3f;

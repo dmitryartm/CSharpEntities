@@ -12,19 +12,20 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
+
         <Menu>
-            <MenuItem Header="Open File" Name="_OpenFileMenuItem" Click="_OpenFileMenuItem_OnClick"/>
+            <MenuItem Header="Open File" Name="_OpenFileMenuItem" Click="_OpenFileMenuItem_OnClick" />
+            <MenuItem Header="Clear" Name="_ClearMenuItem" Click="_ClearMenuItem_OnClick" />
         </Menu>
 
         <Grid Grid.Row="1">
-            
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="400" />
             </Grid.ColumnDefinitions>
-            
+
             <views:DXControl x:Name="_DXControl" />
 
             <GridSplitter Grid.Column="1" ShowsPreview="True" HorizontalAlignment="Stretch"
