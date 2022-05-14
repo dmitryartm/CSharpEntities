@@ -164,24 +164,33 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
 
 
                 void CreateMeshInstanceArrays() {
-                    var entitiesWithInstanceArray = new List<Entity>();
-                    var entitiesWithSingleInstance = new List<Entity>();
+                    var meshesWithoutInstances = new List<Entity>();
+                    var meshesWithInstanceArray = new List<Entity>();
+                    var meshesWithSingleInstance = new List<Entity>();
 
                     this.Entities.ForEach((in Entity entity, ref MeshInstanceList instances) => {
-                        if (instances.TransformMatrices.Count == 1) {
-                            entitiesWithSingleInstance.Add(entity);
-                        }
-                        else {
-                            entitiesWithInstanceArray.Add(entity);
+                        switch (instances.TransformMatrices.Count) {
+                            case 0:
+                                meshesWithoutInstances.Add(entity);
+                                break;
+                            case 1:
+                                meshesWithSingleInstance.Add(entity);
+                                break;
+                            default:
+                                meshesWithInstanceArray.Add(entity);
+                                break;
                         }
                     }).Execute();
 
+                    foreach (var entity in meshesWithoutInstances) {
+                        this.Entities.DestroyEntity(entity);
+                    }
 
-                    foreach (var entity in entitiesWithInstanceArray) {
+                    foreach (var entity in meshesWithInstanceArray) {
                         this.Entities.AddComponents<MeshInstanceArray, MeshInstanceArrayGpu>(entity);
                     }
 
-                    foreach (var entity in entitiesWithSingleInstance) {
+                    foreach (var entity in meshesWithSingleInstance) {
                         this.Entities.AddComponents<MeshSingleInstance>(entity);
                     }
 
@@ -193,7 +202,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                         instance.TransformMatrix = list.TransformMatrices.First();
                     }).Execute();
 
-                    foreach (var entity in entitiesWithInstanceArray.Concat(entitiesWithSingleInstance)) {
+                    foreach (var entity in meshesWithInstanceArray.Concat(meshesWithSingleInstance)) {
                         this.Entities.RemoveComponent<MeshInstanceList>(entity);
                     }
                 }
