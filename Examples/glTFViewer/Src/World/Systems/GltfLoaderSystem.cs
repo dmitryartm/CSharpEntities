@@ -135,7 +135,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                             Matrix.Scaling(new Vector3(node.Scale))
                             * Matrix.RotationQuaternion(new Quaternion(node.Rotation))
                             * Matrix.Translation(new Vector3(node.Translation));
-                        
+
                         var matrix = trs * new Matrix(node.Matrix);
                         if (parentMatrixOpt.TryGetValue(out var parentMatrix)) {
                             matrix *= parentMatrix;
@@ -275,12 +275,24 @@ public record GltfWithBuffer(Gltf Gltf, byte[] BinaryBuffer) {
     public static GltfWithBuffer ReadFromFile(string fileName) {
         var gltf = Interface.LoadModel(fileName);
 
-        var buffer =
-            gltf.Buffers != null && gltf.Buffers.Any()
-                ? Interface.LoadBinaryBuffer(fileName)
-                : Array.Empty<byte>();
+        var buffer = gltf.Buffers != null && gltf.Buffers.Any() && TryLoadBinaryBuffer(fileName, out var bytes)
+            ? bytes
+            : Array.Empty<byte>();
 
         return new GltfWithBuffer(gltf, buffer);
+
+
+        static bool TryLoadBinaryBuffer(string fileName, out byte[] bytes) {
+            try {
+                bytes = Interface.LoadBinaryBuffer(fileName);
+                return true;
+            }
+            catch {
+                // ignored
+                bytes = Array.Empty<byte>();
+                return false;
+            }
+        }
     }
 
 
