@@ -103,11 +103,25 @@ namespace CSlns.Entities.Systems {
         /// <summary>
         /// Add Subsystem
         /// </summary>
-        /// <param name="item"></param>
-        public void Add(ComponentSystem item) {
-            if (item != null) {
-                item.SetOwner(this);
-                this._subsystems.Add(item);
+        /// <param name="system"></param>
+        public void Add(ComponentSystem system) {
+            if (system != null) {
+                system.SetOwner(this);
+                this._subsystems.Add(system);
+            }
+        }
+
+
+        public void AddRange(IEnumerable<ComponentSystem> systems) {
+            foreach (var item in systems) {
+                this.Add(item);
+            }
+        }
+
+
+        public void AddRange(params ComponentSystem[] systems) {
+            foreach (var item in systems) {
+                this.Add(item);
             }
         }
         
@@ -115,12 +129,12 @@ namespace CSlns.Entities.Systems {
         /// <summary>
         /// Remove Subsystem
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="system"></param>
         /// <returns></returns>
-        public bool Remove(ComponentSystem item) {
-            if (item != null && item.Owner == this) {
-                item.ClearOwner();
-                this._subsystems.Remove(item);
+        public bool Remove(ComponentSystem system) {
+            if (system != null && system.Owner == this) {
+                system.ClearOwner();
+                this._subsystems.Remove(system);
                 
                 return true;
             }
