@@ -14,43 +14,34 @@ namespace glTFViewer.World.Systems;
 public class RenderSystem : ComponentSystem<MainWorld> {
 
     public unsafe RenderSystem(MainWorld world) : base(world) {
-        this.Add(DrawSubsystem());
-        return;
+        this.AddRange(
+            new InlineSystem(this.World, "BeginScene", _ => {
+                this.Device.BeginScene();
 
+                var camera = this.Entities.Single<MainCamera>().Get<MainCamera>();
 
-        #region Functions
+                var lightDir = camera.Origin - camera.EyePosition();
+                lightDir.Normalize();
 
+                this.Device.SetViewProj(camera.ViewProjMatrix());
+                this.Device.SetLightDir(lightDir);
+                this.Device.SetRenderState(RenderState.AlphaBlendEnable, false);
 
-        ComponentSystem DrawSubsystem() {
-            return new InlineSystem(this.World, "Draw") {
-                new InlineSystem(this.World, "BeginScene", _ => {
-                    this.Device.BeginScene();
+                this.Device.SetRenderTarget(0, this.RenderSurface);
+                this.Device.SetRenderState(RenderState.ZEnable, true);
+                this.Device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.LightGray, 1.0f, 0);
 
-                    var camera = this.Entities.Single<MainCamera>().Get<MainCamera>();
+                var shaders = this.Shaders;
+                this.Device.SetVertexShader(shaders.VS_ScreenTexture);
+                this.Device.SetPixelShader(shaders.PS_Unlit);
 
-                    var lightDir = camera.Origin - camera.EyePosition();
-                    lightDir.Normalize();
+                this.Device.Indices = this._screenQuad.Indices;
+                this.Device.SetStreamSource(0, this._screenQuad.Vertices, 0, sizeof(VertexData));
 
-                    this.Device.SetViewProj(camera.ViewProjMatrix());
-                    this.Device.SetLightDir(lightDir);
-                    this.Device.SetRenderState(RenderState.AlphaBlendEnable, false);
-
-                    this.Device.SetRenderTarget(0, this.RenderSurface);
-                    this.Device.SetRenderState(RenderState.ZEnable, true);
-                    this.Device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.LightGray, 1.0f, 0);
-
-                    var shaders = this.Shaders;
-                    this.Device.SetVertexShader(shaders.VS_ScreenTexture);
-                    this.Device.SetPixelShader(shaders.PS_Unlit);
-
-                    this.Device.Indices = this._screenQuad.Indices;
-                    this.Device.SetStreamSource(0, this._screenQuad.Vertices, 0, sizeof(VertexData));
-
-                    this.Device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, this._screenQuad.VerticesCount,
-                        0,
-                        this._screenQuad.TrianglesCount);
-                }),
-
+                this.Device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, this._screenQuad.VerticesCount,
+                    0, this._screenQuad.TrianglesCount);
+            }),
+            new InlineSystem(this.World, "Draw Meshes") {
                 new InlineSystem(this.World, "Opaque") {
                     new InlineQuerySystem(this.World, "Instanced",
                         this.Entities.ForEach(
@@ -82,7 +73,6 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                             }
                         }),
                 },
-
                 new InlineSystem(this.World, "Transparent", _ => {
                     this.Device.SetRenderState(RenderState.AlphaBlendEnable, true);
                 }) {
@@ -120,7 +110,6 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                     },
 
                     new InlineSystem(this.World, "Color Pass") {
-                        
                         new InlineQuerySystem(this.World, "Instanced",
                             this.Entities.ForEach(
                                 archetype => archetype.HasComponents<TransparentTag>(),
@@ -152,53 +141,51 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                                 }
                             })
                     },
-                },
+                }
+            },
+            new InlineSystem(this.World, "Update D3DImage and End Scene", _ => {
+                this.Image.Lock();
 
-                new InlineSystem(this.World, "D3DImage Update") {
-                    new InlineSystem(this.World, "Image Lock", _ => this.Image.Lock()),
-                    new InlineSystem(this.World, "Draw to Image Surface", _ => {
-                        this.Device.SetRenderTarget(0, this.ImageSurface);
-                        this.Device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.Black, 1f, 0);
-                        this.Device.StretchRectangle(this.RenderSurface, this.ImageSurface, TextureFilter.None);
+                this.Device.SetRenderTarget(0, this.ImageSurface);
+                this.Device.Clear(ClearFlags.Target | ClearFlags.ZBuffer, Color.Black, 1f, 0);
+                this.Device.StretchRectangle(this.RenderSurface, this.ImageSurface, TextureFilter.None);
 
-                        // this.Device.StretchRectangle(this.RenderSurface, this.ImageSurface, TextureFilter.None);
-                    }),
+                this.Device.EndScene();
 
-                    new InlineSystem(this.World, "End Scene", _ => this.Device.EndScene()),
+                this.Image.SetBackBuffer(D3DResourceType.IDirect3DSurface9, this.ImageSurface.NativePointer);
+                this.Image.AddDirtyRect(new System.Windows.Int32Rect(0, 0, this.SurfaceSize.Width,
+                    this.SurfaceSize.Height));
 
-                    new InlineSystem(this.World, "D3DImage Set Back Buffer", _ => {
-                        this.Image.SetBackBuffer(D3DResourceType.IDirect3DSurface9, this.ImageSurface.NativePointer);
-                        this.Image.AddDirtyRect(new System.Windows.Int32Rect(0, 0, this.SurfaceSize.Width,
-                            this.SurfaceSize.Height));
-                    }),
-
-                    new InlineSystem(this.World, "Image Unlock", _ => this.Image.Unlock())
-                },
-            };
+                this.Image.Unlock();
+            })
+        );
+        return;
 
 
-            static void DrawInstanced(DeviceEx device, in MeshDataGpuComponent mesh,
-                in MeshInstanceArrayGpu instances) {
-                device.Indices = mesh.Indices;
-
-                device.SetStreamSourceFrequency(0, instances.Count, StreamSource.IndexedData);
-                device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
-                device.SetStreamSource(1, instances.TransformMatrices, 0, instances.Stride);
-
-                device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
-                    mesh.TrianglesCount);
-            }
+        #region Functions
 
 
-            static void DrawSingle(DeviceEx device, in MeshDataGpuComponent mesh, in Matrix localToWorld) {
-                device.SetLocalToWorld(localToWorld);
+        static void DrawInstanced(DeviceEx device, in MeshDataGpuComponent mesh,
+            in MeshInstanceArrayGpu instances) {
+            device.Indices = mesh.Indices;
 
-                device.Indices = mesh.Indices;
-                device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
+            device.SetStreamSourceFrequency(0, instances.Count, StreamSource.IndexedData);
+            device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
+            device.SetStreamSource(1, instances.TransformMatrices, 0, instances.Stride);
 
-                device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
-                    mesh.TrianglesCount);
-            }
+            device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
+                mesh.TrianglesCount);
+        }
+
+
+        static void DrawSingle(DeviceEx device, in MeshDataGpuComponent mesh, in Matrix localToWorld) {
+            device.SetLocalToWorld(localToWorld);
+
+            device.Indices = mesh.Indices;
+            device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
+
+            device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
+                mesh.TrianglesCount);
         }
 
 
