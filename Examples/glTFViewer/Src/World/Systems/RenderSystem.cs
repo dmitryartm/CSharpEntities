@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Interop;
 using CSlns.Entities;
 using CSlns.Entities.Systems;
@@ -60,9 +61,13 @@ public class RenderSystem : ComponentSystem<MainWorld> {
 
                     new InlineQuerySystem(this.World, "Single",
                         this.Entities.ForEach(
-                            archetype => !archetype.HasComponents<TransparentTag>(),
-                            (ref MeshDataGpuComponent mesh, ref MeshSingleInstance instance) => {
-                                DrawSingle(this.Device, mesh, instance.TransformMatrix);
+                            archetype =>
+                                !archetype.HasComponents<TransparentTag>()
+                                && !archetype.HasComponents<MeshInstanceArrayGpu>(),
+                            (ref MeshDataGpuComponent mesh, ref MeshInstanceList instances) => {
+                                foreach (var matrix in instances.TransformMatrices) {
+                                    DrawSingle(this.Device, mesh, matrix);
+                                }
                             }),
                         drawVisibleSingle => {
                             if (drawVisibleSingle.Query.HasEntities) {
@@ -73,75 +78,7 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                             }
                         }),
                 },
-                new InlineSystem(this.World, "Transparent", _ => {
-                    this.Device.SetRenderState(RenderState.AlphaBlendEnable, true);
-                }) {
-                    new InlineSystem(this.World, "Depth Pass") {
-                        new InlineQuerySystem(this.World, "Instanced",
-                            this.Entities.ForEach(
-                                archetype => archetype.HasComponents<TransparentTag>(),
-                                (ref MeshDataGpuComponent mesh, ref MeshInstanceArrayGpu instances) =>
-                                    DrawInstanced(this.Device, mesh, instances)
-                            ),
-                            drawInstanced => {
-                                if (drawInstanced.Query.HasEntities) {
-                                    var shaders = this.Shaders;
-                                    this.Device.SetVertexShader(shaders.VS_DiffuseOpaqueUniformColorInstanced);
-                                    this.Device.SetPixelShader(shaders.PS_DepthOnly);
-                                    drawInstanced.Execute();
-                                    this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
-                                }
-                            }),
-
-                        new InlineQuerySystem(this.World, "Single",
-                            this.Entities.ForEach(
-                                archetype => archetype.HasComponents<TransparentTag>(),
-                                (ref MeshDataGpuComponent mesh, ref MeshSingleInstance instance) => {
-                                    DrawSingle(this.Device, mesh, instance.TransformMatrix);
-                                }),
-                            drawVisibleSingle => {
-                                if (drawVisibleSingle.Query.HasEntities) {
-                                    var shaders = this.Shaders;
-                                    this.Device.SetVertexShader(shaders.VS_DiffuseOpaque);
-                                    this.Device.SetPixelShader(shaders.PS_DepthOnly);
-                                    drawVisibleSingle.Execute();
-                                }
-                            })
-                    },
-
-                    new InlineSystem(this.World, "Color Pass") {
-                        new InlineQuerySystem(this.World, "Instanced",
-                            this.Entities.ForEach(
-                                archetype => archetype.HasComponents<TransparentTag>(),
-                                (ref MeshDataGpuComponent mesh, ref MeshInstanceArrayGpu instances) =>
-                                    DrawInstanced(this.Device, mesh, instances)
-                            ),
-                            drawInstanced => {
-                                if (drawInstanced.Query.HasEntities) {
-                                    var shaders = this.Shaders;
-                                    this.Device.SetVertexShader(shaders.VS_DiffuseOpaqueVertexColorsInstanced);
-                                    this.Device.SetPixelShader(shaders.PS_Lit);
-                                    drawInstanced.Execute();
-                                    this.Device.SetStreamSourceFrequency(0, 1, StreamSource.IndexedData);
-                                }
-                            }),
-
-                        new InlineQuerySystem(this.World, "Single",
-                            this.Entities.ForEach(
-                                archetype => archetype.HasComponents<TransparentTag>(),
-                                (ref MeshDataGpuComponent mesh, ref MeshSingleInstance instance) => {
-                                    DrawSingle(this.Device, mesh, instance.TransformMatrix);
-                                }),
-                            drawVisibleSingle => {
-                                if (drawVisibleSingle.Query.HasEntities) {
-                                    var shaders = this.Shaders;
-                                    this.Device.SetPixelShader(shaders.PS_Lit);
-                                    this.Device.SetVertexShader(shaders.VS_DiffuseOpaqueVertexColors);
-                                    drawVisibleSingle.Execute();
-                                }
-                            })
-                    },
-                }
+                new DrawTransparentMeshesSystem(this),
             },
             new InlineSystem(this.World, "Update D3DImage and End Scene", _ => {
                 this.Image.Lock();
@@ -159,37 +96,6 @@ public class RenderSystem : ComponentSystem<MainWorld> {
                 this.Image.Unlock();
             })
         );
-        return;
-
-
-        #region Functions
-
-
-        static void DrawInstanced(DeviceEx device, in MeshDataGpuComponent mesh,
-            in MeshInstanceArrayGpu instances) {
-            device.Indices = mesh.Indices;
-
-            device.SetStreamSourceFrequency(0, instances.Count, StreamSource.IndexedData);
-            device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
-            device.SetStreamSource(1, instances.TransformMatrices, 0, instances.Stride);
-
-            device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
-                mesh.TrianglesCount);
-        }
-
-
-        static void DrawSingle(DeviceEx device, in MeshDataGpuComponent mesh, in Matrix localToWorld) {
-            device.SetLocalToWorld(localToWorld);
-
-            device.Indices = mesh.Indices;
-            device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
-
-            device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
-                mesh.TrianglesCount);
-        }
-
-
-        #endregion
     }
 
 
@@ -267,7 +173,98 @@ public class RenderSystem : ComponentSystem<MainWorld> {
     private DeviceEx Device => this.DeviceManager!.Device!;
 
 
+    private static unsafe void DrawSingle(DeviceEx device, in MeshDataGpuComponent mesh, in Matrix localToWorld) {
+        device.SetLocalToWorld(localToWorld);
+        device.Indices = mesh.Indices;
+        device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
+        device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
+            mesh.TrianglesCount);
+    }
+
+
+    private static unsafe void DrawInstanced(DeviceEx device, in MeshDataGpuComponent mesh,
+        in MeshInstanceArrayGpu instances
+    ) {
+        device.Indices = mesh.Indices;
+        device.SetStreamSourceFrequency(0, instances.Count, StreamSource.IndexedData);
+        device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
+        device.SetStreamSource(1, instances.TransformMatrices, 0, instances.Stride);
+        device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
+            mesh.TrianglesCount);
+    }
+
+
     #endregion
+
+
+    private class DrawTransparentMeshesSystem : ComponentSystem {
+
+        public DrawTransparentMeshesSystem(RenderSystem renderSystem) : base(renderSystem.World) {
+            this._renderSystem = renderSystem;
+            this._fillSortedTransparentMeshInstancesAction = this.Entities.ForEach(
+                archetype => archetype.HasComponents<TransparentTag>(),
+                (ref MeshEntity mesh, ref BoundingBox box, ref Transform transform) => {
+                    var distanceSqr = (this._cameraPosition - box.Center).LengthSquared();
+                    ref var meshDataGpu = ref this.Entities.Ref<MeshDataGpuComponent>(mesh.Entity);
+                    this._sortedTransparentMeshesInstances.Add(distanceSqr, (meshDataGpu, transform.Matrix));
+                });
+        }
+
+
+        protected override void OnStart() {
+            this._renderSystem = this.World.Get<RenderSystem>();
+        }
+
+
+        protected override unsafe void OnExecute() {
+            this._sortedTransparentMeshesInstances.Clear();
+            this._cameraPosition = this.Entities.Single<MainCamera>().Ref<MainCamera>().EyePosition();
+            this._fillSortedTransparentMeshInstancesAction.Execute();
+
+            var device = this.Device;
+            var shaders = this.Shaders;
+
+            device.SetRenderState(RenderState.AlphaBlendEnable, true);
+            device.SetVertexShader(shaders.VS_DiffuseOpaqueVertexColors);
+            for (var i = 0; i < this._sortedTransparentMeshesInstances.Count; ++i) {
+                var (mesh, matrix) = this._sortedTransparentMeshesInstances.Values[i];
+
+                device.SetLocalToWorld(matrix);
+                device.Indices = mesh.Indices;
+                device.SetStreamSource(0, mesh.Vertices, 0, sizeof(VertexData));
+
+                // Depth pass
+                device.SetPixelShader(shaders.PS_DepthOnly);
+                device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
+                    mesh.TrianglesCount);
+
+                // Color pass
+                device.SetPixelShader(shaders.PS_Lit);
+                device.DrawIndexedPrimitive(PrimitiveType.TriangleList, 0, 0, mesh.VerticesCount, 0,
+                    mesh.TrianglesCount);
+            }
+        }
+
+
+        private Vector3 _cameraPosition;
+
+        private readonly SortedList<float, (MeshDataGpuComponent MeshData, Matrix Transform)>
+            _sortedTransparentMeshesInstances = new (new DistanceComparer());
+
+        private readonly QueryAction _fillSortedTransparentMeshInstancesAction;
+        private RenderSystem _renderSystem;
+
+        private Shaders Shaders => this._renderSystem.Shaders;
+        private DeviceEx Device => this._renderSystem.Device;
+
+
+        private class DistanceComparer : IComparer<float> {
+            public int Compare(float x, float y) {
+                return x < y ? 1 : -1;
+            }
+        }
+
+    }
 
 
 }

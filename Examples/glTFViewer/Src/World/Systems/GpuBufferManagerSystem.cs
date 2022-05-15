@@ -22,16 +22,16 @@ public class GpuBufferManagerSystem : ComponentSystem<MainWorld> {
 
         this._createInstancesGpu =
             this.Entities
-                .ForEach((ref MeshInstanceArray instances, ref MeshInstanceArrayGpu instancesGpu) => {
+                .ForEach((ref MeshInstanceList instances, ref MeshInstanceArrayGpu instancesGpu) => {
                     if (instancesGpu.BufferIsEmpty) {
                         var sizeofMatrix = sizeof(Matrix);
-                        instancesGpu.Count = instances.TransformMatrices.Length;
+                        instancesGpu.Count = instances.TransformMatrices.Count;
                         instancesGpu.Stride = sizeofMatrix;
                         instancesGpu.TransformMatrices = new VertexBuffer(
-                            this.Device, instances.TransformMatrices.Length * sizeofMatrix,
+                            this.Device, instances.TransformMatrices.Count * sizeofMatrix,
                             Usage.WriteOnly, VertexFormat.None, Pool.Default);
                         instancesGpu.TransformMatrices.Lock(0, 0, LockFlags.None)
-                            .WriteRange(instances.TransformMatrices, 0, instances.TransformMatrices.Length);
+                            .WriteRange(instances.TransformMatrices.ToArray(), 0, instances.TransformMatrices.Count);
                         instancesGpu.TransformMatrices.Unlock();
                     }
                 });

@@ -154,7 +154,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                 var normalsAccessorIndex = primitive.Attributes["NORMAL"];
                 var indicesAccessorIndex = primitive.Indices!.Value;
 
-                var positions = GetVector3Collection(positionsAccessorIndex, out var minPos, out var maxPos);
+                var positions = GetVector3Collection(positionsAccessorIndex, out var minPosition, out var maxPosition);
                 var normals = GetVector3Collection(normalsAccessorIndex, out _, out _);
                 var indices = GetIndicesCollection(indicesAccessorIndex);
 
@@ -162,11 +162,6 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                 if (primitive.Attributes.TryGetValue("COLOR_0", out var colorsAccessorIndex)) {
                     colors = GetColorCollection(colorsAccessorIndex);
                 }
-
-                var positionsAccessor = accessors[positionsAccessorIndex];
-                var minPosition = new Vector3(positionsAccessor.Min);
-                var maxPosition = new Vector3(positionsAccessor.Max);
-                var boundingBox = new BoundingBox(minPosition, maxPosition);
 
                 RawColorBGRA meshColor;
                 if (primitive.Material.HasValue) {
@@ -213,7 +208,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                 );
 
                 this.Entities.Set(meshEntity, mesh);
-                this.Entities.Set(meshEntity, boundingBox);
+                this.Entities.Set(meshEntity, new BoundingBox(minPosition, maxPosition));
                 this.Entities.Set(meshEntity, new MeshId { Index = i });
                 this.Entities.Set(meshEntity,
                     new MeshInstanceList { TransformMatrices = new List<Matrix>() }
@@ -329,6 +324,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
 
             var nodeWithoutMeshArchetype = this.Entities.Archetype<NodeTag, Transform>();
             var nodeWithMeshArchetype = nodeWithoutMeshArchetype.AddComponents<MeshEntity, BoundingBox>();
+            var nodeWithTransparentMeshArchetype = nodeWithMeshArchetype.AddComponents<TransparentTag>();
 
             foreach (var node in rootNodes) {
                 AddNodeRec(node, Option.None);
@@ -363,7 +359,9 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
                         point = (Vector3) Vector4.Transform(point4, matrix);
                     }
 
-                    entity = this.Entities.CreateEntity(nodeWithMeshArchetype);
+                    entity = this.Entities.CreateEntity(
+                        meshEntity.Has<TransparentTag>() ? nodeWithTransparentMeshArchetype : nodeWithMeshArchetype
+                    );
                     entity.Set(new MeshEntity { Entity = meshEntity });
                     entity.Set(BoundingBox.FromPoints(boxCornersBuffer));
                 }
@@ -385,19 +383,14 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
         void CreateMeshInstanceArrays() {
             var meshesWithoutInstances = new List<Entity>();
             var meshesWithInstanceArray = new List<Entity>();
-            var meshesWithSingleInstance = new List<Entity>();
 
             this.Entities.ForEach((in Entity entity, ref MeshInstanceList instances) => {
-                switch (instances.TransformMatrices.Count) {
-                    case 0:
-                        meshesWithoutInstances.Add(entity);
-                        break;
-                    case 1:
-                        meshesWithSingleInstance.Add(entity);
-                        break;
-                    default:
-                        meshesWithInstanceArray.Add(entity);
-                        break;
+                var count = instances.TransformMatrices.Count;
+                if (count == 0) {
+                    meshesWithoutInstances.Add(entity);
+                }
+                else if (count > 1) {
+                    meshesWithInstanceArray.Add(entity);
                 }
             }).Execute();
 
@@ -406,23 +399,9 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
             }
 
             foreach (var entity in meshesWithInstanceArray) {
-                this.Entities.AddComponents<MeshInstanceArray, MeshInstanceArrayGpu>(entity);
-            }
-
-            foreach (var entity in meshesWithSingleInstance) {
-                this.Entities.AddComponents<MeshSingleInstance>(entity);
-            }
-
-            this.Entities.ForEach((ref MeshInstanceList list, ref MeshInstanceArray array) => {
-                array.TransformMatrices = list.TransformMatrices.ToArray();
-            }).Execute();
-
-            this.Entities.ForEach((ref MeshInstanceList list, ref MeshSingleInstance instance) => {
-                instance.TransformMatrix = list.TransformMatrices.First();
-            }).Execute();
-
-            foreach (var entity in meshesWithInstanceArray.Concat(meshesWithSingleInstance)) {
-                this.Entities.RemoveComponent<MeshInstanceList>(entity);
+                if (!entity.Has<TransparentTag>()) {
+                    this.Entities.AddComponents<MeshInstanceArrayGpu>(entity);
+                }
             }
         }
 
