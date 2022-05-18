@@ -44,6 +44,8 @@
         
         #region Extensions
 
+        public Archetype Archetype => this.EntityManager.EntityArchetype(this.Id);
+
         public ref T Ref<T>() => ref this.EntityManager.Ref<T>(this.Id);
 
         public ref readonly T Get<T>() => ref this.Ref<T>();
