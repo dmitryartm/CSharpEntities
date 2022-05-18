@@ -2,13 +2,14 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net5.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <UseWindowsForms>true</UseWindowsForms>
         <LangVersion>10</LangVersion>
         <RootNamespace>glTFViewer</RootNamespace>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+        <TargetFrameworks>net462;net5.0-windows</TargetFrameworks>
     </PropertyGroup>
 
     <ItemGroup>

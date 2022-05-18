@@ -424,7 +424,7 @@ public class GltfLoaderSystem : ComponentSystem<MainWorld> {
             camera.Origin = sceneSphere.Center;
             var minimumSize = 2.01f * sceneSphere.Radius;
             camera.MinimumFrustumSize = new Size2F(minimumSize, minimumSize);
-            camera.Phi = 1.5f * MathF.PI;
+            camera.Phi = 1.5f * (float) Math.PI;
             camera.Radius = sceneSphere.Radius * 1.5f;
             camera.ZNear = 0f;
             camera.ZFar = sceneSphere.Radius * 3f;

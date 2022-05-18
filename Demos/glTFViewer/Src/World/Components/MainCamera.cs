@@ -20,21 +20,21 @@ public class MainCamera {
 
     public Vector3 EyePosition() {
         return this.Origin + new Vector3(
-            this.Radius * MathF.Cos(this.Theta) * MathF.Cos(this.Phi),
-            this.Radius * MathF.Cos(this.Theta) * MathF.Sin(this.Phi),
-            this.Radius * MathF.Sin(this.Theta));
+            (float) (this.Radius * Math.Cos(this.Theta) * Math.Cos(this.Phi)),
+            (float) (this.Radius * Math.Cos(this.Theta) * Math.Sin(this.Phi)),
+            (float) (this.Radius * Math.Sin(this.Theta)));
     }
 
 
     public void UpdateRotation(float deltaTime) {
-        this.Phi = (this.Phi + this.RotationSpeed * deltaTime) % (2f * MathF.PI);
+        this.Phi = (this.Phi + this.RotationSpeed * deltaTime) % (2f * (float) Math.PI);
     }
 
 
     public void SetAspectRatio(float width, float height) {
         this.AspectRatio = width / height;
     }
-    
+
 
     public Size2F ViewFrustumSize() {
         var height = Math.Max(this.MinimumFrustumSize.Height, this.MinimumFrustumSize.Width / this.AspectRatio);
@@ -52,8 +52,8 @@ public class MainCamera {
         var frustumSize = this.ViewFrustumSize();
         return Matrix.OrthoRH(frustumSize.Width, frustumSize.Height, this.ZNear, this.ZFar);
     }
-    
-    
+
+
     public Matrix ViewProjMatrix() => Matrix.Multiply(this.ViewMatrix(), this.ProjectionMatrix());
-    
+
 }
