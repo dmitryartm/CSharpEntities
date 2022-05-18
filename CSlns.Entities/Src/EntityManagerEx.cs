@@ -205,14 +205,12 @@ namespace CSlns.Entities {
         }
 
         
-        public static QueryAction ForEach<T>(this EntityManager em, EntityAction<T> action)
-                where T : struct {
+        public static QueryAction ForEach<T>(this EntityManager em, EntityAction<T> action) {
             return ForEach(em, null, action);
         }
         
         
-        public static QueryAction ForEach<T0>(this EntityManager entities, Predicate<Archetype> query, EntityAction<T0> action)
-            where T0 : struct {
+        public static QueryAction ForEach<T0>(this EntityManager entities, Predicate<Archetype> query, EntityAction<T0> action) {
             
             query = IncludeTypesInQuery(query, typeof(T0));
 
