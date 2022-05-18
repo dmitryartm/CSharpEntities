@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSlns.Entities", "CSlns.Ent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSlns.Entities.Wpf", "CSlns.Entities.Wpf\CSlns.Entities.Wpf.csproj", "{2ED851F5-1BD0-4FFB-B0A0-296E4841C879}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example.glTFViewer", "Examples\glTFViewer\Example.glTFViewer.csproj", "{37BCFDC6-455F-4EA5-9DFA-A9FF83E6C2A9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.glTFViewer", "Demos\glTFViewer\Demo.glTFViewer.csproj", "{37BCFDC6-455F-4EA5-9DFA-A9FF83E6C2A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

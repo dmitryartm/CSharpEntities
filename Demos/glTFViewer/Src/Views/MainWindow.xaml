@@ -6,7 +6,7 @@
         xmlns:entities="clr-namespace:CSlns.Entities.Wpf.Views;assembly=CSlns.Entities.Wpf"
         xmlns:views="clr-namespace:glTFViewer.Views"
         mc:Ignorable="d"
-        Title="glTFViewer example" Height="700" Width="1000">
+        Title="Demo.glTFViewer" Height="700" Width="1000">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
