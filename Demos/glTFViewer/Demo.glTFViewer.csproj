@@ -10,6 +10,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <RuntimeIdentifier>win-x86</RuntimeIdentifier>
         <TargetFrameworks>net462;net5.0-windows</TargetFrameworks>
+        <Version>1.1.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
