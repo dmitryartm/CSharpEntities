@@ -13,8 +13,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\CSlns.Entities.Wpf\CSlns.Entities.Wpf.csproj" />
-        <ProjectReference Include="..\..\CSlns.Entities\CSlns.Entities.csproj" />
+        <ProjectReference Include="..\..\CSharpEntities.Wpf\CSharpEntities.Wpf.csproj" />
+        <ProjectReference Include="..\..\CSharpEntities\CSharpEntities.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,4 @@
-﻿using CSlns.Entities;
+﻿using CSharpEntities;
 
 
 namespace glTFViewer.World.Components;

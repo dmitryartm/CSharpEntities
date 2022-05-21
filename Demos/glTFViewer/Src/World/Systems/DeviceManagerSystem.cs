@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Subjects;
-using CSlns.Entities.Systems;
+using CSharpEntities.Systems;
 using glTFViewer.Utils;
 using Serilog;
 using SharpDX;

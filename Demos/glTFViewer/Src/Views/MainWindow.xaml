@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:entities="clr-namespace:CSlns.Entities.Wpf.Views;assembly=CSlns.Entities.Wpf"
         xmlns:views="clr-namespace:glTFViewer.Views"
+        xmlns:views1="clr-namespace:CSharpEntities.Wpf.Views;assembly=CSharpEntities.Wpf"
         mc:Ignorable="d"
         Title="Demo.glTFViewer" Height="700" Width="1000">
     <Grid>
@@ -38,12 +38,12 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <entities:ComponentSystemTreeView Grid.Row="0" x:Name="_SystemTree" />
+                <views1:ComponentSystemTreeView Grid.Row="0" x:Name="_SystemTree" />
 
                 <GridSplitter Grid.Row="1" ShowsPreview="True" HorizontalAlignment="Stretch"
                               VerticalAlignment="Stretch" />
 
-                <entities:ArchetypeListView Grid.Row="2" x:Name="_ArchetypeList" />
+                <views1:ArchetypeListView Grid.Row="2" x:Name="_ArchetypeList" />
 
             </Grid>
 

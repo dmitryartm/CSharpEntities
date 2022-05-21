@@ -1,7 +1,6 @@
 ﻿using System.Threading;
 using System.Windows.Interop;
-using CSlns.Entities;
-using CSlns.Entities.Systems;
+using CSharpEntities.Systems;
 using glTFViewer.World.Systems;
 using Serilog;
 
@@ -9,7 +8,7 @@ using Serilog;
 namespace glTFViewer.World;
 
 
-public class MainWorld : CSlns.Entities.World {
+public class MainWorld : CSharpEntities.World {
 
     public MainWorld(D3DImage image) {
         this.D3DImage = image;

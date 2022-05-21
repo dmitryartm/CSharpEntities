@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using CSlns.Entities;
-using CSlns.Entities.Systems;
+using CSharpEntities;
+using CSharpEntities.Systems;
 using glTFViewer.World.Components;
 using SharpDX;
 using Quaternion = System.Numerics.Quaternion;

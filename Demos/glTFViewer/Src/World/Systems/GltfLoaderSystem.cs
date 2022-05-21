@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using CSlns.Entities;
-using CSlns.Entities.Systems;
+using CSharpEntities;
+using CSharpEntities.Option;
+using CSharpEntities.Systems;
 using glTFLoader;
 using glTFLoader.Schema;
 using glTFViewer.World.Components;

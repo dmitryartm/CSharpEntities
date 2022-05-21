@@ -1,6 +1,6 @@
 ﻿using System;
-using CSlns.Entities;
-using CSlns.Entities.Systems;
+using CSharpEntities;
+using CSharpEntities.Systems;
 using glTFViewer.Utils;
 using glTFViewer.World.Components;
 using SharpDX;

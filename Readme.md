@@ -1,18 +1,18 @@
-# CSlns.Entities
+# CSharpEntities
 > This project is not under active development
  
-`CSlns.Entities` is a simple cache-friendly C# ECS (Entity Component System) inspired by [Unity's ECS](https://docs.unity3d.com/Packages/com.unity.entities@0.50/manual/ecs_core.html).
+`CSharpEntities` is a simple cache-friendly C# ECS (Entity Component System) inspired by [Unity's ECS](https://docs.unity3d.com/Packages/com.unity.entities@0.50/manual/ecs_core.html).
 
 # Table of Contents
-- [Project Structure]()
+- [Project Structure](#project-structure)
 - [Code Examples](#code-examples)
     - [Using EntiyManager class](#using-entitymanager-class)
     - [Using World and ComponentSystem classes](#using-world-and-componentsystem-classes)
 - [Demo Application glTFViewer](#demo-application-gltfviewer)
 
-# Project Sturcture
-* `CSlns.Entities` -- ECS itself
-* `CSlns.Entities.Wpf` -- system and archetype inspectors WPF controls
+# Project Structure
+* `CSharpEntities` -- ECS itself
+* `CSharpEntities.Wpf` -- system and archetype inspectors WPF controls
 * `Demo.glTFViewer` -- comprehensive [demo application](#demo-application-gltfviewer)
 
 # Code Examples
@@ -78,8 +78,8 @@ Position =  0,00 | Archetype { Position; Velocity; Acceleration; }
 
 ```c#
 using System;
-using CSlns.Entities;
-using CSlns.Entities.Systems;
+using CSharpEntities;
+using CSharpEntities.Systems;
 
 
 struct Position {
@@ -204,7 +204,7 @@ Position =  0,00 | Archetype { Name; Position; }
 # Demo Application glTFViewer
 
 [glTF](https://en.wikipedia.org/wiki/GlTF) file viewer built using WPF and DirectX 9 (using [SharpDX](http://sharpdx.org/)) demonstrating
-how `CSlns.Entities` and `CSlns.Entities.WPF` can be used.
+how `CSharpEntities` and `CShapEntities.WPF` can be used.
 
 > This is not a general purpose model viewer, it supports only limited number of features and
 > will not be able to open every glTF file!

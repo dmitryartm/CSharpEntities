@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows.Interop;
-using CSlns.Entities;
-using CSlns.Entities.Systems;
+using CSharpEntities;
+using CSharpEntities.Systems;
 using glTFViewer.Utils;
 using glTFViewer.World.Components;
 using SharpDX;

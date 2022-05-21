@@ -1,4 +1,4 @@
-﻿using CSlns.Entities.Systems;
+﻿using CSharpEntities.Systems;
 using glTFViewer.Utils;
 using SharpDX;
 using SharpDX.Direct3D9;
